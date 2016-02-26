@@ -1,6 +1,8 @@
 package me.demerzel.entity.pokemon;
 
 import me.demerzel.entity.Entity;
+import me.demerzel.entity.human.EntityPlayer;
+import me.demerzel.state.Game;
 import me.demerzel.util.Type;
 import me.demerzel.move.Move;
 import me.demerzel.util.Utilities;
@@ -13,12 +15,13 @@ import java.util.HashMap;
  */
 public abstract class EntityPokemon extends Entity{
     private int currentHP;
-    private int baseHP;
-    private int baseAtk;
-    private int baseDef;
-    private int baseSpA;
-    private int baseSpD;
-    private int baseSpe;
+    private int baseHP, health;
+    private int baseAtk, attack;
+    private int baseDef, defense;
+    private int baseSpA, specialAttack;
+    private int baseSpD, specialDefense;
+    private int baseSpe, speed;
+    private int accuracy;
     private int exp;
     private int level;
     private int baseExpYield;
@@ -31,6 +34,9 @@ public abstract class EntityPokemon extends Entity{
     private ArrayList<Move> currentMoves;
     private ExperienceGroup experienceGroup;
 
+    private EntityPokemon evolvesTo;
+    private int levelToEvolve;
+
     public EntityPokemon(String name, int baseHP, int baseAtk, int baseDef, int baseSpA, int baseSpD, int baseSpe, int baseExpYield, String description, Type primaryType, Type secondaryType, ExperienceGroup experienceGroup) {
         super(name);
         this.baseHP = baseHP;
@@ -39,6 +45,8 @@ public abstract class EntityPokemon extends Entity{
         this.baseSpA = baseSpA;
         this.baseSpD = baseSpD;
         this.baseSpe = baseSpe;
+
+        this.accuracy = 1;
         this.baseExpYield = baseExpYield;
         this.description = description;
         this.primaryType = primaryType;
@@ -47,10 +55,71 @@ public abstract class EntityPokemon extends Entity{
 
         this.exp = 0;
         this.level = 1;
-        this.currentHP = baseHP;
         this.trainerOwned = false;
         this.learnByLevelUp = new HashMap<>();
         this.currentMoves = new ArrayList<>();
+
+        this.evolvesTo = null;
+        this.levelToEvolve = -1;
+
+        updateStats();
+
+        this.currentHP = health;
+    }
+
+    public void updateStats(){
+        health = healthFormula(baseHP);
+        attack = otherStatFormula(baseAtk);
+        defense = otherStatFormula(baseDef);
+        specialAttack = otherStatFormula(baseSpA);
+        specialDefense = otherStatFormula(baseSpD);
+        speed = otherStatFormula(baseSpe);
+    }
+
+    public void setStats(int[] stats){
+        stats[0] = health;
+        stats[1] = attack;
+        stats[2] = defense;
+        stats[3] = specialAttack;
+        stats[4] = specialDefense;
+        stats[5] = speed;
+    }
+
+    public int[] getStats(){
+        return new int[] {health, attack, defense, specialAttack, specialDefense, speed};
+    }
+
+    public void evolve(){
+        if(getEvolvesTo() != null){
+            System.out.println(getName() + " is evolving!");
+            System.out.println(getName() + " has evolved to " + getEvolvesTo().getName());
+
+            EntityPlayer player = Game.getInstance().getPlayer();
+
+            int i = player.getTeam().indexOf(this);
+
+            EntityPokemon p = getEvolvesTo();
+            p.setStats(getStats());
+            p.setLevel(getLevel());
+            p.setExp(getExp());
+            player.getTeam().set(i, p);
+        }
+    }
+
+    private int healthFormula(int health){
+        return (( (2 * health + 31 + (252 / 4) * level) / 100 ) + level + 10);
+    }
+
+    private int otherStatFormula(int stat){
+        return (int) (((((31 + 2 * stat + (252 / 4)) * level) / 100) + 5) * 1.1);
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
     }
 
     public int getCurrentHP() {
@@ -113,8 +182,60 @@ public abstract class EntityPokemon extends Entity{
         this.baseSpe = baseSpe;
     }
 
+    public int getAttack() {
+        return attack;
+    }
+
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
+
+    public int getDefense() {
+        return defense;
+    }
+
+    public void setDefense(int defense) {
+        this.defense = defense;
+    }
+
+    public int getSpecialAttack() {
+        return specialAttack;
+    }
+
+    public void setSpecialAttack(int specialAttack) {
+        this.specialAttack = specialAttack;
+    }
+
+    public int getSpecialDefense() {
+        return specialDefense;
+    }
+
+    public void setSpecialDefense(int specialDefense) {
+        this.specialDefense = specialDefense;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public int getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(int accuracy) {
+        this.accuracy = accuracy;
+    }
+
     public int getExp() {
         return exp;
+    }
+
+    public void setExp(int exp){
+        this.exp = exp;
     }
 
     public void addExp(int exp) {
@@ -127,16 +248,24 @@ public abstract class EntityPokemon extends Entity{
         }
     }
 
+    public EntityPokemon getEvolvesTo() {
+        return evolvesTo;
+    }
+
+    public void setEvolvesTo(EntityPokemon evolvesTo) {
+        this.evolvesTo = evolvesTo;
+    }
+
     public int getExpToLevel(){
         switch(experienceGroup){
             case FAST:
-                return (int) (4 * Math.pow(level + 1, 3)) / 5;
+                return (int) ((4 * Math.pow(level + 1, 3)) / 5.0);
             case MEDIUM_FAST:
                 return (int) Math.pow(level + 1, 3);
             case MEDIUM_SLOW:
-                return (int) ((6/5 * Math.pow(level + 1, 3)) - (15 * Math.pow(level + 1, 2)) + (100 * level + 1) - 140);
+                return (int) ((6.0/5.0 * Math.pow(level + 1, 3)) - (15 * Math.pow(level + 1, 2)) + (100 * level + 1) - 140);
             case SLOW:
-                return (int) (5 * Math.pow(level + 1, 3)) / 4;
+                return (int) ((5 * Math.pow(level + 1, 3)) / 4.0);
             default:
                 return -1;
         }
@@ -156,10 +285,19 @@ public abstract class EntityPokemon extends Entity{
 
     public void levelUp(){
         level++;
+        updateStats();
+        setCurrentHP(health);
         System.out.println(getName() + " has grown to level " + level + "!");
 
         if(learnByLevelUp.get(level) != null){
             learnMove(learnByLevelUp.get(level));
+        }
+
+        if(getEvolvesTo() != null){
+            if(levelToEvolve == level){
+                setCurrentHP(getHealth());
+                evolve();
+            }
         }
     }
 
@@ -225,9 +363,9 @@ public abstract class EntityPokemon extends Entity{
             if(choice.equalsIgnoreCase("y")){
                 System.out.println("Which move should be deleted?");
                 currentMoves.stream().forEach(toForget -> System.out.println(currentMoves.indexOf(toForget) + " | " + toForget.getName()));
-                System.out.println("5 | " + move.getName());
+                System.out.println("4 | " + move.getName());
                 int forget = Integer.parseInt(Utilities.getUserInput(""));
-                if(forget == 5){
+                if(forget == 4){
                     learnMove(move);
                 }else{
                     System.out.println(getName() + " has forgotten " + currentMoves.get(forget).getName() + " and learned " + move.getName() + "!");
@@ -239,5 +377,51 @@ public abstract class EntityPokemon extends Entity{
             System.out.println(getName() + " has learned " + move.getName() + "!");
             currentMoves.add(move);
         }
+    }
+
+    public int getLevelToEvolve() {
+        return levelToEvolve;
+    }
+
+    public void setLevelToEvolve(int levelToEvolve) {
+        this.levelToEvolve = levelToEvolve;
+    }
+
+    public boolean useMove(int move, EntityPokemon target){
+        currentMoves.get(move).execute(this, target);
+        return true;
+    }
+
+    public boolean useMove(String move, EntityPokemon target){
+        int index = 0;
+        for(Move m : getCurrentMoves()){
+            if(m.getName().equalsIgnoreCase(move)){
+                useMove(index, target);
+                return true;
+            }
+
+            index++;
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "EntityPokemon{" +
+                "currentHP=" + currentHP +
+                ", baseHP=" + baseHP +
+                ", health=" + health +
+                ", baseAtk=" + baseAtk +
+                ", attack=" + attack +
+                ", baseDef=" + baseDef +
+                ", defense=" + defense +
+                ", baseSpA=" + baseSpA +
+                ", specialAttack=" + specialAttack +
+                ", baseSpD=" + baseSpD +
+                ", specialDefense=" + specialDefense +
+                ", baseSpe=" + baseSpe +
+                ", speed=" + speed +
+                '}';
     }
 }

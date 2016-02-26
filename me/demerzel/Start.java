@@ -1,15 +1,13 @@
 package me.demerzel;
 
-import me.demerzel.entity.pokemon.EntityPokemon;
-import me.demerzel.entity.pokemon.impl.Bulbasaur;
 
-/**
- * Created by Demerzel on 2/7/16.
- */
+import me.demerzel.state.Game;
+import me.demerzel.state.impl.BattleState;
+
 public class Start {
-    public static void main(String[] args) {
-        EntityPokemon bulbasaur = new Bulbasaur();
-
-        bulbasaur.addExp(1757);
+    public static void main(String[] args){
+        Game game = Game.getInstance();
+        game.setState(BattleState.getInstance());
+        game.init();
     }
 }

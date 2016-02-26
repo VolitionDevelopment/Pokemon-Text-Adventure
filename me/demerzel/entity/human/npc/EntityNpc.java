@@ -8,10 +8,12 @@ import java.util.ArrayList;
  * Created by Demerzel on 2/7/16.
  */
 public abstract class EntityNpc extends EntityHuman{
+    private String type;
     private ArrayList<String> interactionText;
 
-    public EntityNpc(String name){
+    public EntityNpc(String name, String type){
         super(name);
+        this.type = type;
     }
 
     public ArrayList<String> getInteractionText() {
@@ -24,5 +26,17 @@ public abstract class EntityNpc extends EntityHuman{
 
     public void addInteractionText(String text){
         interactionText.add(text);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getFullName(){
+        return type + " " + getName();
     }
 }

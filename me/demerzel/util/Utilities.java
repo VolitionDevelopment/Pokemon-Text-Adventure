@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class Utilities {
     public static String getUserInput(String output){
         Scanner scanner = new Scanner(System.in);
-        System.out.println(output);
+        System.out.print(output);
         return scanner.nextLine();
     }
 }

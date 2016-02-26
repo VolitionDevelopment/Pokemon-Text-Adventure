@@ -1,6 +1,5 @@
 package me.demerzel.move;
 
-import me.demerzel.entity.Entity;
 import me.demerzel.entity.pokemon.EntityPokemon;
 import me.demerzel.util.Type;
 
@@ -9,17 +8,27 @@ import me.demerzel.util.Type;
  */
 public abstract class Move {
     private String name;
+    private String description;
     private int power;
     private int accuracy;
+    private int maxPP;
+    private int currentPP;
+    private boolean goesLast;
     private MoveType moveType;
     private Type type;
+    private CritStage critStage;
 
-    public Move(String name, int power, int accuracy, MoveType moveType, Type type) {
+    public Move(String name, int power, int accuracy, int maxPP, MoveType moveType, Type type) {
         this.name = name;
+        this.description = "NULl MOVE";
         this.power = power;
         this.accuracy = accuracy;
         this.moveType = moveType;
         this.type = type;
+        this.goesLast = false;
+        this.critStage = CritStage.STAGE_0;
+        this.maxPP = maxPP;
+        this.currentPP = maxPP;
     }
 
     public String getName() {
@@ -28,6 +37,14 @@ public abstract class Move {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getPower() {
@@ -46,6 +63,30 @@ public abstract class Move {
         this.accuracy = accuracy;
     }
 
+    public int getMaxPP() {
+        return maxPP;
+    }
+
+    public void setMaxPP(int maxPP) {
+        this.maxPP = maxPP;
+    }
+
+    public int getCurrentPP() {
+        return currentPP;
+    }
+
+    public void setCurrentPP(int currentPP) {
+        this.currentPP = currentPP;
+    }
+
+    public boolean doesGoLast() {
+        return goesLast;
+    }
+
+    public void setGoesLast(boolean goesLast) {
+        this.goesLast = goesLast;
+    }
+
     public MoveType getMoveType() {
         return moveType;
     }
@@ -62,19 +103,40 @@ public abstract class Move {
         this.type = type;
     }
 
-    public void execute(EntityPokemon user, EntityPokemon target, Move moveUsed){
-        int attack = user.getBaseAtk();
-        if(moveUsed.getMoveType() == MoveType.SPECIAL){
-            attack = user.getBaseSpA();
+    public CritStage getCritStage() {
+        return critStage;
+    }
+
+    public void setCritStage(CritStage critStage) {
+        this.critStage = critStage;
+    }
+
+    public void execute(EntityPokemon user, EntityPokemon target){
+        System.out.println(user.getName() + " used " + getName() + "!");
+        double d = Math.random();
+        if(d <= getAccuracy() * 0.01){
+            int attack = user.getAttack();
+            if(this.getMoveType() == MoveType.SPECIAL){
+                attack = user.getSpecialAttack();
+            }
+
+            int defense = user.getDefense();
+            if(this.getMoveType() == MoveType.SPECIAL){
+                defense = user.getSpecialDefense();
+            }
+
+            //double random = ThreadLocalRandom.current().nextDouble(0.85, 1);
+            int damage = (int) (((user.getLevel() * 2 + 10) / 250.0) * (getPower()) * (attack / (double)defense) + 2);
+            target.modHP(-damage);
+            setCurrentPP(getCurrentPP() - 1);
+        }else{
+            System.out.println("The attack missed!");
         }
 
-        int defense = user.getBaseDef();
-        if(moveUsed.getMoveType() == MoveType.SPECIAL){
-            defense = user.getBaseSpD();
-        }
+        effect(user, target);
+    }
 
-        int damage = ((2 * user.getLevel() + 10) / 250) * (attack / defense) * moveUsed.getPower() + 2;
+    public void effect(EntityPokemon user, EntityPokemon target){
 
-        target.modHP(damage);
     }
 }
