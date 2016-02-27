@@ -8,6 +8,7 @@ import me.demerzel.state.Game;
 import me.demerzel.state.State;
 import me.demerzel.util.Utilities;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -57,10 +58,7 @@ public class BattleState implements State {
 
     private void showMenu(){
         System.out.println("What will you do?");
-        System.out.println("> Fight");
-        System.out.println("> Items");
-        System.out.println("> Team");
-        System.out.println("> Run");
+        Utilities.drawMenu("Fight", "Items", "Pokemon", "Run");
 
         String input = Utilities.getUserInput("> ").toLowerCase();
 
@@ -83,12 +81,16 @@ public class BattleState implements State {
 
     private boolean check(){
         if(p1.getCurrentHP() <= 0){
+            System.out.println(p1.getName() + " fainted!");
+
             if(player.getAlivePokemon() == 0){
                 System.out.println("You have no more Pokemon that can fight!");
                 System.out.println(player.getName() + " blacked out...");
                 Game.getInstance().setState(GameState.getInstance());
                 return false;
             }
+
+            switchTo();
         }
 
         if(p2.getCurrentHP() <= 0){
@@ -109,7 +111,9 @@ public class BattleState implements State {
 
     private void fight(){
         System.out.println("Choose a move: ");
-        p1.getCurrentMoves().stream().forEach(s -> System.out.println("> " + s.getName() + " [Power: " + s.getPower() + "] [Accuracy: " + s.getAccuracy() + "] [PP: " + s.getCurrentPP() + "]"));
+        ArrayList<String> moves = new ArrayList<>();
+        p1.getCurrentMoves().stream().forEach(s -> moves.add(s.getName()));
+        Utilities.drawMenu(moves.toArray(new String[moves.size()]));
 
         String input = Utilities.getUserInput("> ");
 
@@ -128,9 +132,13 @@ public class BattleState implements State {
             }
 
             Random rand = new Random();
+            System.out.print("Enemy ");
             p2.useMove(rand.nextInt(p2.getCurrentMoves().size()), p1);
+
+            check();
         }else{
             Random rand = new Random();
+            System.out.print("Enemy ");
             p2.useMove(rand.nextInt(p2.getCurrentMoves().size()), p1);
 
             if(!check()){
@@ -141,6 +149,8 @@ public class BattleState implements State {
                 System.out.println("Pokemon doesn't know that move!");
                 fight();
             }
+
+            check();
         }
     }
 
