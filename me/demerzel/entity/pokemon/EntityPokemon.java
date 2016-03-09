@@ -21,6 +21,7 @@ public abstract class EntityPokemon extends Entity{
     private int baseSpA, specialAttack;
     private int baseSpD, specialDefense;
     private int baseSpe, speed;
+    private StatStage atkStage, defStage, spaStage, spdStage, speStage;
     private int accuracy;
     private int exp;
     private int level;
@@ -28,6 +29,7 @@ public abstract class EntityPokemon extends Entity{
     private boolean trainerOwned;
 
     private String description;
+    private String sprite;
     private Type primaryType;
     private Type secondaryType;
     private HashMap<Integer, Move> learnByLevelUp;
@@ -45,6 +47,12 @@ public abstract class EntityPokemon extends Entity{
         this.baseSpA = baseSpA;
         this.baseSpD = baseSpD;
         this.baseSpe = baseSpe;
+
+        atkStage = StatStage.STAGE_0;
+        defStage = StatStage.STAGE_0;
+        spaStage = StatStage.STAGE_0;
+        spdStage = StatStage.STAGE_0;
+        speStage = StatStage.STAGE_0;
 
         this.accuracy = 1;
         this.baseExpYield = baseExpYield;
@@ -65,6 +73,16 @@ public abstract class EntityPokemon extends Entity{
         updateStats();
 
         this.currentHP = health;
+    }
+
+    public boolean knowsMove(String move){
+        for(Move m : currentMoves){
+            if(m.getName().equalsIgnoreCase(move)){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void updateStats(){
@@ -99,10 +117,12 @@ public abstract class EntityPokemon extends Entity{
             int i = player.getTeam().indexOf(this);
 
             EntityPokemon p = getEvolvesTo();
-            p.setStats(getStats());
             p.setLevel(getLevel());
             p.setExp(getExp());
+            p.setCurrentMoves(getCurrentMoves());
+            p.updateStats();
             player.getTeam().set(i, p);
+
         }
     }
 
@@ -230,6 +250,46 @@ public abstract class EntityPokemon extends Entity{
         this.accuracy = accuracy;
     }
 
+    public StatStage getAtkStage() {
+        return atkStage;
+    }
+
+    public void setAtkStage(StatStage atkStage) {
+        this.atkStage = atkStage;
+    }
+
+    public StatStage getDefStage() {
+        return defStage;
+    }
+
+    public void setDefStage(StatStage defStage) {
+        this.defStage = defStage;
+    }
+
+    public StatStage getSpaStage() {
+        return spaStage;
+    }
+
+    public void setSpaStage(StatStage spaStage) {
+        this.spaStage = spaStage;
+    }
+
+    public StatStage getSpdStage() {
+        return spdStage;
+    }
+
+    public void setSpdStage(StatStage spdStage) {
+        this.spdStage = spdStage;
+    }
+
+    public StatStage getSpeStage() {
+        return speStage;
+    }
+
+    public void setSpeStage(StatStage speStage) {
+        this.speStage = speStage;
+    }
+
     public int getExp() {
         return exp;
     }
@@ -353,6 +413,8 @@ public abstract class EntityPokemon extends Entity{
         return currentMoves;
     }
 
+    public void setCurrentMoves(ArrayList<Move> moves){ this.currentMoves = moves;}
+
     public void addCurrentMove(Move move){
         currentMoves.add(move);
     }
@@ -423,5 +485,13 @@ public abstract class EntityPokemon extends Entity{
                 ", baseSpe=" + baseSpe +
                 ", speed=" + speed +
                 '}';
+    }
+
+    public String getSprite() {
+        return sprite;
+    }
+
+    public void setSprite(String sprite) {
+        this.sprite = sprite;
     }
 }

@@ -46,7 +46,6 @@ public class BattleState implements State {
         p2 = opponent.getTeam().get(0);
         System.out.println("=======================================");
         System.out.println();
-
     }
 
     @Override
@@ -60,7 +59,7 @@ public class BattleState implements State {
         System.out.println("What will you do?");
         Utilities.drawMenu("Fight", "Items", "Pokemon", "Run");
 
-        String input = Utilities.getUserInput("> ").toLowerCase();
+        String input = Utilities.getUserInput(">> ").toLowerCase();
 
         switch(input){
             case "fight":
@@ -76,6 +75,7 @@ public class BattleState implements State {
             default:
                 System.out.println("Unrecognized command!");
                 showMenu();
+                break;
         }
     }
 
@@ -87,14 +87,14 @@ public class BattleState implements State {
                 System.out.println("You have no more Pokemon that can fight!");
                 System.out.println(player.getName() + " blacked out...");
                 Game.getInstance().setState(GameState.getInstance());
-                return false;
+                return true;
             }
 
             switchTo();
         }
 
         if(p2.getCurrentHP() <= 0){
-            int gained = (int) ((1.5 * p2.getBaseExpYield() * 1 * p2.getLevel() * 1 * 1 * 1 * 1) / 7);
+            int gained = (int) (1.5 * p2.getBaseExpYield() * 1 * p2.getLevel() * 1 * 1 * 1 * 1 / 7);
 
             System.out.println("The enemy " + p2.getName() + " fainted!");
             p1.addExp(gained);
@@ -102,11 +102,11 @@ public class BattleState implements State {
             if(opponent.getAlivePokemon() == 0){
                 System.out.println("You win!");
                 Game.getInstance().setState(GameState.getInstance());
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     private void fight(){
@@ -115,42 +115,36 @@ public class BattleState implements State {
         p1.getCurrentMoves().stream().forEach(s -> moves.add(s.getName()));
         Utilities.drawMenu(moves.toArray(new String[moves.size()]));
 
-        String input = Utilities.getUserInput("> ");
+        String input = Utilities.getUserInput(">> ");
 
         if(input.equalsIgnoreCase("back")){
             return;
         }
 
-        if(p1.getSpeed() >= p2.getSpeed()){
-            if(!p1.useMove(input, p2)){
-                System.out.println("Pokemon doesn't know that move!");
-                fight();
+        if(!p1.knowsMove(input)){
+            System.out.println("Your Pokemon doesn't know that move!");
+            fight();
+            return;
+        }
+
+
+
+        ArrayList<EntityPokemon> attackOrder = new ArrayList<>();
+        attackOrder.add(p1);
+        attackOrder.add(p2);
+        attackOrder.sort((o1, o2) -> new Double(o2.getSpeed() * o2.getSpeStage().getMultiplier()).compareTo(o1.getSpeed() * o2.getSpeStage().getMultiplier()));
+
+        for(EntityPokemon pokemon : attackOrder){
+            if(pokemon.equals(p1)){
+                p1.useMove(input, p2);
+            }else{
+                System.out.print("Enemy ");
+                p2.useMove(new Random().nextInt(p2.getCurrentMoves().size()), p1);
             }
 
-            if(!check()){
+            if(check()){
                 return;
             }
-
-            Random rand = new Random();
-            System.out.print("Enemy ");
-            p2.useMove(rand.nextInt(p2.getCurrentMoves().size()), p1);
-
-            check();
-        }else{
-            Random rand = new Random();
-            System.out.print("Enemy ");
-            p2.useMove(rand.nextInt(p2.getCurrentMoves().size()), p1);
-
-            if(!check()){
-                return;
-            }
-
-            if(!p1.useMove(input, p2)){
-                System.out.println("Pokemon doesn't know that move!");
-                fight();
-            }
-
-            check();
         }
     }
 
@@ -162,7 +156,7 @@ public class BattleState implements State {
             System.out.println("> [" + i + "] " + pokemon.getName() + " [HP: " + pokemon.getCurrentHP() + "]");
         }
 
-        String in = Utilities.getUserInput("> ");
+        String in = Utilities.getUserInput(">> ");
 
         if(in.equalsIgnoreCase("back")){
             return;
@@ -173,6 +167,7 @@ public class BattleState implements State {
         if(player.getTeam().get(input).equals(p1)){
             System.out.println("That Pokemon is already out!");
             switchTo();
+            return;
         }
 
         System.out.print(p1.getName() + " was withdrawn. ");
@@ -214,5 +209,8 @@ public class BattleState implements State {
         }
         System.out.println("]");
         System.out.println("=======================================");
+        System.out.println();
+
+
     }
 }

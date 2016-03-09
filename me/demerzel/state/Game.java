@@ -18,7 +18,8 @@ public class Game {
         currentState = GameState.getInstance();
         player = new EntityPlayer("Jackson");
         player.addPokemon(new Bulbasaur());
-        player.addPokemon(new Ivysaur());
+
+
     }
 
     public static Game getInstance(){

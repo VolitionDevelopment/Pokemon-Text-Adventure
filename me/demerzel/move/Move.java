@@ -114,19 +114,58 @@ public abstract class Move {
     public void execute(EntityPokemon user, EntityPokemon target){
         System.out.println(user.getName() + " used " + getName() + "!");
         double d = Math.random();
+        double atkMultiplier = user.getAtkStage().getMultiplier();
+        double defMultiplier = user.getDefStage().getMultiplier();
         if(d <= getAccuracy() * 0.01){
             int attack = user.getAttack();
             if(this.getMoveType() == MoveType.SPECIAL){
                 attack = user.getSpecialAttack();
+                atkMultiplier = user.getSpaStage().getMultiplier();
             }
 
             int defense = user.getDefense();
             if(this.getMoveType() == MoveType.SPECIAL){
                 defense = user.getSpecialDefense();
+                defMultiplier = user.getSpdStage().getMultiplier();
             }
 
             //double random = ThreadLocalRandom.current().nextDouble(0.85, 1);
-            int damage = (int) (((user.getLevel() * 2 + 10) / 250.0) * (getPower()) * (attack / (double)defense) + 2);
+
+            double multiplier = 1;
+
+            if(target.getPrimaryType().isWeakTo(getType())){
+                multiplier *= 2;
+            }
+
+            if(target.getSecondaryType().isWeakTo(getType())){
+                multiplier *= 2;
+            }
+
+            if(target.getPrimaryType().isResistantTo(getType())){
+                multiplier *= 0.5;
+            }
+
+            if(target.getSecondaryType().isResistantTo(getType())){
+                multiplier *= 0.5;
+            }
+
+            if(target.getPrimaryType().isImmuneTo(getType())){
+                multiplier = 0;
+            }
+
+            if(target.getSecondaryType().isImmuneTo(getType())){
+                multiplier = 0;
+            }
+
+            if(multiplier > 1){
+                System.out.println("It's super effective!");
+            }else if(multiplier == 0){
+                System.out.println("It had no effect!");
+            }else if(multiplier < 1){
+                System.out.println("It's not very effective...");
+            }
+
+            int damage = (int) ((((user.getLevel() * 2 + 10) / 250.0) * (getPower()) * (attack * atkMultiplier/ defense * defMultiplier) + 2) * multiplier);
             target.modHP(-damage);
             setCurrentPP(getCurrentPP() - 1);
         }else{

@@ -17,6 +17,8 @@ public class SwordsDance extends Move {
 
     @Override
     public void execute(EntityPokemon user, EntityPokemon target){
+        System.out.println(user.getName() + " used " + getName() + "!");
+        System.out.println(user.getName() + "'s Attack rose sharply!");
 
     }
 }
