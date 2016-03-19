@@ -27,4 +27,20 @@ public enum StatStage {
     public double getMultiplier(){
         return multiplier;
     }
+
+    public StatStage increment(){
+        if(ordinal() == values().length - 1){
+            return this;
+        }
+
+        return values()[ordinal() + 1];
+    }
+
+    public StatStage decriment(){
+        if(ordinal() == 0){
+            return this;
+        }
+
+        return values()[ordinal() - 1];
+    }
 }

@@ -24,6 +24,7 @@ public enum Type {
     DARK(),
     STEEL(),
     FAIRY(),
+    NONE(),
     UNKNOWN();
 
     private Type[] resistances;
@@ -53,5 +54,17 @@ public enum Type {
 
     public boolean isImmuneTo(Type attacker){
         return Arrays.asList(immune).contains(attacker);
+    }
+
+    public void setWeaknesses(Type[] types){
+        weaknesses = types;
+    }
+
+    public void setResistances(Type[] resistances) {
+        this.resistances = resistances;
+    }
+
+    public void setImmune(Type[] immune) {
+        this.immune = immune;
     }
 }

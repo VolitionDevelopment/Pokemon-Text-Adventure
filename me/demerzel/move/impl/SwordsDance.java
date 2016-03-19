@@ -18,7 +18,13 @@ public class SwordsDance extends Move {
     @Override
     public void execute(EntityPokemon user, EntityPokemon target){
         System.out.println(user.getName() + " used " + getName() + "!");
-        System.out.println(user.getName() + "'s Attack rose sharply!");
 
+        if(user.getAtkStage().increment() == user.getAtkStage()){
+            System.out.println(user.getName() + "'s Attack couldn't go any higher!");
+        }else{
+            System.out.println(user.getName() + "'s Attack rose sharply!");
+            user.setAtkStage(user.getAtkStage().increment());
+            user.setAtkStage(user.getAtkStage().increment());
+        }
     }
 }

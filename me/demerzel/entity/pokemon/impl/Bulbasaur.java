@@ -11,12 +11,12 @@ import me.demerzel.entity.pokemon.EntityPokemon;
 public class Bulbasaur extends EntityPokemon {
 
     public Bulbasaur() {
-        super("Bulbasaur", 45, 49, 49, 65, 65, 45, 64, "", Type.GRASS, Type.POISON, ExperienceGroup.MEDIUM_SLOW);
-        addCurrentMove(new Cut());
-        addCurrentMove(new CometPunch());
-        addCurrentMove(new MegaPunch());
+        super("Bulbasaur", 45, 49, 49, 65, 65, 45, 64, "", Type.GRASS, Type.NONE, ExperienceGroup.MEDIUM_SLOW);
+        addCurrentMove(new Scratch());
+        addCurrentMove(new VineWhip());
+        addCurrentMove(new Growl());
 
-        addMoveToLevelUp(4, new IcePunch());
+        addMoveToLevelUp(2, new IcePunch());
         setEvolvesTo(new Ivysaur());
         setLevelToEvolve(16);
 
